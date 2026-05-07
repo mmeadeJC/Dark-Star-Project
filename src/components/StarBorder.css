@@ -1,0 +1,109 @@
+/*
+ * Star Border — React Bits–style shimmer. Class names prefixed with `sb-`.
+ * Demo: https://reactbits.dev/animations/star-border
+ */
+
+.sb-star-border-container {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.sb-border-gradient-bottom {
+  position: absolute;
+  width: 300%;
+  height: 50%;
+  bottom: -12px;
+  right: -250%;
+  border-radius: 50%;
+  opacity: 0.68;
+  filter: blur(10px);
+  mix-blend-mode: screen;
+  animation: sb-star-movement-bottom linear infinite alternate;
+  transform: translateZ(0);
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.sb-border-gradient-top {
+  position: absolute;
+  opacity: 0.68;
+  width: 300%;
+  height: 50%;
+  top: -12px;
+  left: -250%;
+  border-radius: 50%;
+  filter: blur(10px);
+  mix-blend-mode: screen;
+  animation: sb-star-movement-top linear infinite alternate;
+  transform: translateZ(0);
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/*
+ * Soft core: blocks the middle of the sweep (no hard edge banding) and lets the
+ * glow die off smoothly toward the label.
+ */
+.sb-star-edge-mask {
+  position: absolute;
+  inset: var(--sb-edge-inset, 2px);
+  border-radius: inherit;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    farthest-corner ellipse at 50% 48%,
+    var(--sb-edge-mask-bg, var(--background)) 0%,
+    var(--sb-edge-mask-bg, var(--background)) 44%,
+    color-mix(
+        in srgb,
+        var(--sb-edge-mask-bg, var(--background)) 42%,
+        transparent
+      )
+      74%,
+    transparent 93%
+  );
+}
+
+.sb-star-border-inner {
+  position: relative;
+  z-index: 2;
+  border-radius: inherit;
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.sb-star-border-inner.sb-star-border-inner--opaque {
+  border: 1px solid #222;
+  background: #000;
+  color: #fff;
+  font-size: 16px;
+  text-align: center;
+  padding: 16px 26px;
+  border-radius: inherit;
+}
+
+@keyframes sb-star-movement-bottom {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-100%, 0%);
+    opacity: 0;
+  }
+}
+
+@keyframes sb-star-movement-top {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(100%, 0%);
+    opacity: 0;
+  }
+}

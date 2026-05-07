@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Russo_One } from "next/font/google";
+
+import Galaxy from "@/components/Galaxy";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,9 +15,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const russoOne = Russo_One({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-russo-one",
+});
+
 export const metadata: Metadata = {
-  title: "Leonardo AI Project",
-  description: "An AI-powered creative platform — placeholder landing page.",
+  title: "Dark Star",
+  description:
+    "Dark Star — an AI-powered creative platform (placeholder landing page).",
 };
 
 export default function RootLayout({
@@ -25,10 +35,30 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${russoOne.variable} h-full antialiased`}
+      style={{ colorScheme: "dark" }}
     >
-      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">
-        {children}
+      <body className="relative min-h-full flex flex-col text-zinc-100">
+        <Galaxy
+          className="pointer-events-none fixed inset-0 z-0 block min-h-screen min-w-full"
+          mouseInteraction={false}
+          mouseRepulsion={false}
+          transparent
+          whiteStars
+          brightness={0.5}
+          focal={[0.5, 0.48]}
+          hueShift={252}
+          saturation={0.75}
+          glowIntensity={0.3}
+          density={1.28}
+          starSpeed={0.18}
+          twinkleIntensity={0.2}
+          rotationSpeed={0.012}
+          speed={0.38}
+        />
+        <div className="relative z-10 flex min-h-full flex-1 flex-col">
+          {children}
+        </div>
       </body>
     </html>
   );

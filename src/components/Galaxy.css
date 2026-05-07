@@ -1,0 +1,11 @@
+/* No `position` rule — `position: relative` would override layout `fixed`. */
+.galaxy-container {
+  width: 100%;
+  height: 100%;
+}
+
+.galaxy-container canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

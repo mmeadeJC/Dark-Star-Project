@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Default to dark so embedded previews (e.g. Simple Browser) match the real site
+     when they report prefers-color-scheme: light. */
+  --background: #09090b;
+  --foreground: #fafafa;
 }
 
 @theme inline {
@@ -10,17 +12,16 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-russo: var(--font-russo-one);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background-color: var(--background);
 }
 
 body {
-  background: var(--background);
+  /* Transparent so the fixed WebGL `<Galaxy />` (z-0) shows through; base color lives on `html`. */
+  background-color: transparent;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }

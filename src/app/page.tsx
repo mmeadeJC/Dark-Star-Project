@@ -1,10 +1,3 @@
-const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "Docs", href: "#docs" },
-];
-
 const features = [
   {
     title: "Generate from prompts",
@@ -59,6 +52,11 @@ const tiers = [
   },
 ];
 
+import { HeroParallax } from "@/components/HeroParallax";
+import { PillCircleHoverLink } from "@/components/PillCircleHoverLink";
+import StarBorder from "@/components/StarBorder";
+import { SiteHeader } from "@/components/SiteHeader";
+
 const galleryGradients = [
   "from-violet-500 via-fuchsia-500 to-rose-500",
   "from-cyan-400 via-blue-500 to-indigo-600",
@@ -73,94 +71,43 @@ const galleryGradients = [
 export default function Home() {
   return (
     <div className="flex flex-col">
-      {/* Top nav */}
-      <header className="sticky top-0 z-30 border-b border-white/5 bg-zinc-950/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <a href="#" className="flex items-center gap-2">
-            <span
-              aria-hidden
-              className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-bold"
+      <SiteHeader />
+
+      <HeroParallax
+        staticLines={{
+          line1: "This is Dark Star",
+          line2: "A vibe-coded experiment.",
+        }}
+        actions={
+          <>
+            <StarBorder
+              glow="brand"
+              speed="6.5s"
+              thickness={0}
+              className="inline-flex rounded-full"
+              innerClassName="rounded-full [&_a]:inline-flex"
             >
-              L
-            </span>
-            <span className="text-base font-semibold tracking-tight">Leonardo</span>
-          </a>
-          <nav className="hidden items-center gap-8 md:flex">
-            {navLinks.map((l) => (
-              <a
-                key={l.label}
-                href={l.href}
-                className="text-sm text-zinc-400 transition hover:text-white"
+              <PillCircleHoverLink
+                variant="secondary"
+                href="#"
+                className="min-h-[3.25rem] border border-white/20 bg-transparent px-8 py-3.5 text-lg font-semibold"
               >
-                {l.label}
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center gap-2">
-            <a
+                The Center
+              </PillCircleHoverLink>
+            </StarBorder>
+            <PillCircleHoverLink
               href="#"
-              className="hidden rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:text-white sm:inline-flex"
+              className="min-h-[3.25rem] border border-white/10 bg-white px-8 py-3.5 text-lg font-semibold"
+              labelClassName="text-zinc-950"
             >
-              Sign in
-            </a>
-            <a
-              href="#"
-              className="inline-flex items-center rounded-lg bg-white px-4 py-2 text-sm font-medium text-zinc-950 transition hover:bg-zinc-200"
-            >
-              Get started
-            </a>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(167,139,250,0.25),transparent_60%)]"
-        />
-        <div className="mx-auto max-w-5xl px-6 pt-24 pb-16 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-            <span className="size-1.5 rounded-full bg-emerald-400" />
-            New release — placeholder announcement
-          </span>
-          <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight sm:text-6xl">
-            Create production-quality
-            <br />
-            visuals with AI
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg text-zinc-400">
-            Generate, edit, and iterate on world-class images, illustrations, and
-            assets. Built for creators, designers, and teams.
-          </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <a
-              href="#"
-              className="inline-flex items-center justify-center rounded-lg bg-white px-5 py-3 text-sm font-medium text-zinc-950 transition hover:bg-zinc-200"
-            >
-              Get started — it&apos;s free
-            </a>
-            <a
-              href="#"
-              className="inline-flex items-center justify-center rounded-lg border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-zinc-100 transition hover:bg-white/10"
-            >
-              Watch demo
-            </a>
-          </div>
-
-          {/* Hero visual placeholder */}
-          <div className="mt-16 overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/50 shadow-2xl">
-            <div className="grid aspect-[16/9] grid-cols-3 gap-2 p-2">
-              {galleryGradients.slice(0, 3).map((g, i) => (
-                <div
-                  key={i}
-                  className={`rounded-xl bg-gradient-to-br ${g} opacity-90`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+              Of the Universe
+            </PillCircleHoverLink>
+          </>
+        }
+        stickyScrollScreens={7}
+        backgroundDrift={64}
+        backgroundScale={0.08}
+      />
 
       {/* Trust strip */}
       <section className="border-y border-white/5 bg-zinc-900/30">
@@ -211,7 +158,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Made on Leonardo
+              Made on Dark Star
             </h2>
             <p className="mt-4 text-zinc-400">
               A glimpse of what creators are making. Replace these tiles with real
@@ -248,7 +195,7 @@ export default function Home() {
               }`}
             >
               {tier.highlighted && (
-                <span className="mb-4 inline-flex w-fit rounded-full bg-violet-500/20 px-2.5 py-0.5 text-xs font-medium text-violet-300 ring-1 ring-violet-500/40">
+                <span className="mb-4 inline-flex min-h-8 w-fit items-center rounded-full bg-violet-500/20 px-3.5 py-1.5 text-sm font-semibold text-violet-300 ring-1 ring-violet-500/40">
                   Most popular
                 </span>
               )}
@@ -274,16 +221,32 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <a
-                href="#"
-                className={`mt-8 inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium transition ${
-                  tier.highlighted
-                    ? "bg-white text-zinc-950 hover:bg-zinc-200"
-                    : "border border-white/15 bg-white/5 text-zinc-100 hover:bg-white/10"
-                }`}
-              >
-                {tier.cta}
-              </a>
+              {tier.highlighted ? (
+                <PillCircleHoverLink
+                  variant="primary"
+                  href="#"
+                  className="mt-8 min-h-[3.25rem] justify-center rounded-full border border-transparent bg-white px-7 py-3.5 text-lg font-semibold"
+                  labelClassName="text-zinc-950"
+                >
+                  {tier.cta}
+                </PillCircleHoverLink>
+              ) : (
+                <StarBorder
+                  glow="brand"
+                  speed="6.5s"
+                  thickness={0}
+                  className="mt-8 inline-flex w-full justify-center rounded-full"
+                  innerClassName="rounded-full [&_a]:inline-flex"
+                >
+                  <PillCircleHoverLink
+                    variant="secondary"
+                    href="#"
+                    className="min-h-[3.25rem] justify-center rounded-full border border-white/15 bg-transparent px-7 py-3.5 text-lg font-semibold"
+                  >
+                    {tier.cta}
+                  </PillCircleHoverLink>
+                </StarBorder>
+              )}
             </div>
           ))}
         </div>
@@ -299,30 +262,31 @@ export default function Home() {
             Join the placeholder community of creators building world-class assets
             with AI.
           </p>
-          <a
+          <PillCircleHoverLink
             href="#"
-            className="mt-8 inline-flex items-center justify-center rounded-lg bg-white px-5 py-3 text-sm font-medium text-zinc-950 transition hover:bg-zinc-200"
+            className="mt-8 min-h-[3.375rem] justify-center rounded-full border border-transparent bg-white px-8 py-3.5 text-lg font-semibold"
+            labelClassName="text-zinc-950"
           >
             Get started — it&apos;s free
-          </a>
+          </PillCircleHoverLink>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 py-10">
+      <footer id="contact" className="scroll-mt-24 border-t border-white/5 py-10">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6">
           <div className="flex items-center gap-2">
             <span
               aria-hidden
-              className="grid size-6 place-items-center rounded-md bg-gradient-to-br from-violet-500 to-fuchsia-500 text-xs font-bold"
+              className="grid size-6 place-items-center rounded-md bg-gradient-to-br from-violet-500 to-fuchsia-500 text-[8px] font-bold leading-none tracking-tight"
             >
-              L
+              DS
             </span>
             <span className="text-sm text-zinc-400">
-              © {new Date().getFullYear()} Leonardo AI Project — placeholder
+              © {new Date().getFullYear()} Dark Star — placeholder
             </span>
           </div>
-          <nav className="flex gap-6 text-sm text-zinc-500">
+          <nav className="flex flex-wrap gap-x-8 gap-y-2 text-lg font-semibold text-zinc-500">
             <a href="#" className="transition hover:text-white">
               Terms
             </a>
