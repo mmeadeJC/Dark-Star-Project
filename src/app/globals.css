@@ -25,3 +25,25 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* About page: skeleton hand “scroll this way” cue */
+@keyframes hand-scroll-cue {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  45%,
+  55% {
+    transform: translate3d(22px, 0, 0);
+  }
+}
+
+.about-hand-cue {
+  animation: hand-scroll-cue 1.45s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-hand-cue {
+    animation: none;
+  }
+}

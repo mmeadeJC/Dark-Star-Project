@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Russo_One } from "next/font/google";
 
 import Galaxy from "@/components/Galaxy";
+import { SiteFooter } from "@/components/SiteFooter";
 
 import "./globals.css";
 
@@ -58,6 +59,7 @@ export default function RootLayout({
         />
         <div className="relative z-10 flex min-h-full flex-1 flex-col">
           {children}
+          <SiteFooter />
         </div>
       </body>
     </html>

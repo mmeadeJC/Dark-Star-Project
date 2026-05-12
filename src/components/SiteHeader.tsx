@@ -7,11 +7,9 @@ import { PillCircleHoverLink } from "@/components/PillCircleHoverLink";
 import StarBorder from "@/components/StarBorder";
 
 const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "Docs", href: "#docs" },
-  { label: "Contact", href: "#contact" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/#contact" },
 ];
 
 /** Pixels scrolled before frosted chrome appears */
@@ -44,7 +42,7 @@ export function SiteHeader() {
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-[1.125rem]">
         <a
-          href="#"
+          href="/"
           aria-label="Dark Star"
           className="inline-flex items-center gap-1 text-white [font-family:var(--font-russo-one)] text-2xl tracking-tight sm:gap-1 sm:text-3xl md:text-4xl md:tracking-tighter drop-shadow-[0_1px_12px_rgba(0,0,0,0.55)]"
         >

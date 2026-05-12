@@ -7,8 +7,16 @@ const PILL_TIMING =
 const LIME_GRADIENT_BG =
   "bg-[linear-gradient(159deg,#1fff3a_0%,#1fff3a_16%,#adf65a_42%,#caf67a_62%,#daf88c_82%,#dfff5f_100%)]" as const;
 
+/** Static gradient fill for text (matches secondary pill label at rest). */
+export const LIME_GRADIENT_CLIP_TEXT =
+  `${LIME_GRADIENT_BG} bg-clip-text text-transparent [-webkit-text-fill-color:transparent]` as const;
+
+/** `inline-block` + `w-max` so gradients map across glyphs, not full layout width (avoids flat‑green headings). */
+export const LIME_GRADIENT_HEADLINE =
+  `${LIME_GRADIENT_CLIP_TEXT} inline-block w-max max-w-full` as const;
+
 const SECONDARY_LABEL_REST =
-  `${LIME_GRADIENT_BG} bg-clip-text text-transparent group-hover:bg-none group-hover:bg-clip-border group-hover:text-black group-hover:[-webkit-text-fill-color:unset]` as const;
+  `${LIME_GRADIENT_CLIP_TEXT} group-hover:bg-none group-hover:bg-clip-border group-hover:text-black group-hover:[-webkit-text-fill-color:unset]` as const;
 
 type PillVariant = "primary" | "secondary";
 

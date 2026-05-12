@@ -8,6 +8,11 @@ import {
   type ReactNode,
 } from "react";
 
+import {
+  HeroScrollCarousel,
+  type HeroCarouselSlide,
+} from "@/components/HeroScrollCarousel";
+
 export type ParallaxWord = {
   text: string;
   /** Vertical drift in px when scroll progress reaches 1 (larger = moves faster). */
@@ -40,6 +45,23 @@ type HeroParallaxProps = {
   letterboxScrollZoom?: number;
   /** Clockwise rotation in degrees when scroll reaches end of hero range. */
   letterboxScrollRotateDeg?: number;
+  /** Optional carousel that rises from the bottom late in the hero scroll range. */
+  carouselSlides?: readonly HeroCarouselSlide[];
+  /** Scroll progress (0–1) when the carousel begins moving in. */
+  carouselEnterStart?: number;
+  /** Scroll progress when the carousel finishes settling. */
+  carouselEnterEnd?: number;
+  /**
+   * Headline + CTAs are fully transparent when scroll progress reaches this value (linear 1 → 0).
+   * Example: `0.34` ≈ first 34% of the hero scroll track (about 2.4 viewport heights when `stickyScrollScreens` is 7).
+   */
+  heroForegroundFadeEndProgress?: number;
+  /** Logo / wordmark above the carousel; scrolls up after hero copy fades. */
+  brandImage?: { src: string; alt: string } | null;
+  /** When set, begins `brandImage` entrance (0–1 scroll progress). */
+  brandEnterStart?: number;
+  /** When set, `brandImage` entrance completes. */
+  brandEnterEnd?: number;
 };
 
 function prefersReducedMotion(): boolean {
@@ -60,6 +82,13 @@ export function HeroParallax({
   letterboxSrc = "/DarkStarLetter%20box%203.svg",
   letterboxScrollZoom = 6.25,
   letterboxScrollRotateDeg = 68,
+  carouselSlides,
+  carouselEnterStart,
+  carouselEnterEnd,
+  heroForegroundFadeEndProgress,
+  brandImage,
+  brandEnterStart,
+  brandEnterEnd,
 }: HeroParallaxProps) {
   const outerRef = useRef<HTMLElement>(null);
   const [progress, setProgress] = useState(0);
@@ -110,18 +139,62 @@ export function HeroParallax({
   const letterboxMotionT = 1 - (1 - progress) ** 2.05;
   const letterboxScale = 1 + letterboxMotionT * letterboxScrollZoom;
   const letterboxRotateDeg = letterboxMotionT * letterboxScrollRotateDeg;
-  /** Letterbox fades in sync with zoom/spin (full fade by end of hero scroll strip). */
-  const letterboxOpacity = Math.max(0, 1 - letterboxMotionT * 1.12);
   /**
-   * Center block (static headline + CTAs): matches letterbox visibility so it’s fully
-   * gone as soon as the letterbox graphic has faded out — not lingering on linear `progress`.
+   * Letterbox dims faster mid-scroll (power curve), then settles at ~1% opacity when the
+   * hero strip ends so a faint graphic can still read under the next section.
    */
-  const heroFgOpacity =
-    staticLines && letterboxSrc
-      ? letterboxOpacity
-      : staticLines
-        ? Math.max(0, 1 - progress * 1.55)
-        : undefined;
+  const letterboxFadePower = 2.45;
+  const letterboxOpacityFloor = 0.01;
+  const tMotion = Math.min(1, Math.max(0, letterboxMotionT));
+  const letterboxOpacity =
+    letterboxOpacityFloor +
+    (1 - letterboxOpacityFloor) * (1 - tMotion) ** letterboxFadePower;
+
+  /** Headline + CTAs: linear fade 1 → 0 over the first portion of hero scroll (independent of letterbox floor). */
+  const fgFadeEnd = Math.max(
+    0.08,
+    Math.min(1, heroForegroundFadeEndProgress ?? 0.34),
+  );
+  const heroFgOpacity = staticLines
+    ? Math.max(0, 1 - Math.min(1, progress / fgFadeEnd))
+    : undefined;
+
+  const defaultBrandStart = Math.min(0.58, fgFadeEnd + 0.12);
+  const defaultBrandEnd = Math.min(0.8, Math.max(defaultBrandStart + 0.14, fgFadeEnd + 0.36));
+  const brandStartResolved = brandEnterStart ?? defaultBrandStart;
+  const brandEndResolved = brandEnterEnd ?? defaultBrandEnd;
+
+  const brandT =
+    brandImage?.src && brandEndResolved > brandStartResolved
+      ? Math.min(
+          1,
+          Math.max(
+            0,
+            (progress - brandStartResolved) /
+              (brandEndResolved - brandStartResolved),
+          ),
+        )
+      : 0;
+
+  const resolvedCarouselEnterStart =
+    carouselEnterStart ??
+    (brandImage?.src
+      ? Math.min(0.9, brandEndResolved + 0.08)
+      : Math.min(0.92, fgFadeEnd + 0.1));
+  const resolvedCarouselEnterEnd = carouselEnterEnd ?? 0.98;
+
+  const carouselT =
+    carouselSlides?.length &&
+    resolvedCarouselEnterEnd > resolvedCarouselEnterStart
+      ? Math.min(
+          1,
+          Math.max(
+            0,
+            (progress - resolvedCarouselEnterStart) /
+              (resolvedCarouselEnterEnd - resolvedCarouselEnterStart),
+          ),
+        )
+      : 0;
 
   const showEyebrow = eyebrow != null;
   const showSubtitle = subtitle != null;
@@ -133,125 +206,141 @@ export function HeroParallax({
       className="relative"
       style={{ minHeight: `calc(${scrollScreens} * 100vh)` }}
     >
-      {/* Fixed viewport-height stage so layers share one box that tracks resize (svh ~= visible chrome) */}
-      <div className="sticky top-0 flex h-[100svh] min-h-[100svh] w-full max-w-none shrink-0 flex-col overflow-hidden">
-        <div className="relative flex h-full min-h-0 w-full max-w-none flex-col">
-          {/* Edge-to-edge (same as nav bar chrome): not inside max-w-7xl */}
-          <div
-            className="absolute inset-0 z-0 overflow-hidden bg-transparent will-change-transform"
-            style={{
-              transform: `translate3d(0, ${bgY}px, 0) scale(${bgScale})`,
-            }}
-          >
-            {children}
-          </div>
-
-          {letterboxSrc ? (
+      {/* Sticky stage: inner clips letterbox zoom; carousel is a sibling so it can translate in from below without being clipped. */}
+      <div className="sticky top-0 relative h-[100svh] min-h-[100svh] w-full max-w-none shrink-0 overflow-visible">
+        <div className="relative flex h-full min-h-0 w-full max-w-none flex-col overflow-hidden">
+            {/* Edge-to-edge (same as nav bar chrome): not inside max-w-7xl */}
             <div
-              className="pointer-events-none absolute inset-0 z-[5] bg-transparent"
-              style={{ backgroundColor: "transparent" }}
-              aria-hidden
-            >
-              <div
-                className="absolute inset-0 will-change-transform"
-                style={{
-                  transform: `translateZ(0) scale(${letterboxScale}) rotate(${letterboxRotateDeg}deg)`,
-                  transformOrigin: "50% 50%",
-                  opacity: letterboxOpacity,
-                }}
-              >
-                {/* preserveAspectRatio="none" on SVG + object-fit fill + scroll scale/spin */}
-                <img
-                  src={letterboxSrc}
-                  alt=""
-                  className="absolute inset-0 block min-h-0 min-w-0 select-none"
-                  draggable={false}
-                  decoding="async"
-                  fetchPriority="high"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "fill",
-                    maxWidth: "none",
-                    maxHeight: "none",
-                  }}
-                />
-              </div>
-            </div>
-          ) : null}
-
-          {/* Starts under fixed nav (~overlays letterbox); top padding = chrome + notch only */}
-          <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-6 pb-8 pt-[max(5.125rem,calc(env(safe-area-inset-top,0px)+4.5rem))]">
-            {showEyebrow ? (
-              <div className="shrink-0 text-center">{eyebrow}</div>
-            ) : null}
-
-            <div
-              className={`relative flex min-h-0 flex-1 flex-col items-center justify-center py-6 ${showEyebrow ? "mt-2 sm:mt-3" : ""}`}
+              className="absolute inset-0 z-0 overflow-hidden bg-transparent will-change-transform"
               style={{
-                opacity: staticLines ? heroFgOpacity : undefined,
+                transform: `translate3d(0, ${bgY}px, 0) scale(${bgScale})`,
               }}
             >
-              {staticLines ? (
-                <div className="relative flex max-w-2xl translate-y-2 flex-col items-center sm:max-w-3xl sm:translate-y-0 md:-translate-y-4 lg:-translate-y-8">
-                  <h1 className="font-russo text-center text-balance">
-                    <span className="block text-3xl font-normal leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-6xl">
-                      {staticLines.line1}
-                    </span>
-                    <span className="mt-3 block text-3xl font-normal leading-tight tracking-tight sm:mt-3.5 sm:text-4xl md:text-5xl lg:text-6xl">
-                      {staticLines.line2}
-                    </span>
-                  </h1>
-                  {showActions ? (
-                    <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:mt-9 sm:flex-row">
-                      {actions}
-                    </div>
-                  ) : null}
+              {children}
+            </div>
+
+            {letterboxSrc ? (
+              <div
+                className="pointer-events-none absolute inset-0 z-[5] bg-transparent"
+                style={{ backgroundColor: "transparent" }}
+                aria-hidden
+              >
+                <div
+                  className="absolute inset-0 will-change-transform"
+                  style={{
+                    transform: `translateZ(0) scale(${letterboxScale}) rotate(${letterboxRotateDeg}deg)`,
+                    transformOrigin: "50% 50%",
+                    opacity: letterboxOpacity,
+                  }}
+                >
+                  {/* preserveAspectRatio="none" on SVG + object-fit fill + scroll scale/spin */}
+                  <img
+                    src={letterboxSrc}
+                    alt=""
+                    className="absolute inset-0 block min-h-0 min-w-0 select-none"
+                    draggable={false}
+                    decoding="async"
+                    fetchPriority="high"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "fill",
+                      maxWidth: "none",
+                      maxHeight: "none",
+                    }}
+                  />
                 </div>
-              ) : (
-                <>
-                  <h1 className="relative flex flex-col items-center gap-1 text-balance text-5xl font-semibold tracking-tight sm:gap-2 sm:text-7xl md:text-8xl">
-                    {words.map((w, i) => (
-                      <span
-                        key={`${i}-${w.text}`}
-                        className="inline-block will-change-transform"
+              </div>
+            ) : null}
+
+            {/* Starts under fixed nav (~overlays letterbox); top padding = chrome + notch only */}
+            <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-6 pb-8 pt-[max(5.125rem,calc(env(safe-area-inset-top,0px)+4.5rem))]">
+              {showEyebrow ? (
+                <div className="shrink-0 text-center">{eyebrow}</div>
+              ) : null}
+
+              <div
+                className={`relative flex min-h-0 flex-1 flex-col items-center justify-center py-6 ${showEyebrow ? "mt-2 sm:mt-3" : ""}`}
+                style={{
+                  opacity: staticLines ? heroFgOpacity : undefined,
+                  pointerEvents:
+                    staticLines && heroFgOpacity !== undefined && heroFgOpacity < 0.02
+                      ? "none"
+                      : undefined,
+                }}
+              >
+                {staticLines ? (
+                  <div className="relative flex max-w-2xl translate-y-2 flex-col items-center sm:max-w-3xl sm:translate-y-0 md:-translate-y-4 lg:-translate-y-8">
+                    <h1 className="font-russo text-center text-balance">
+                      <span className="block text-3xl font-normal leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-6xl">
+                        {staticLines.line1}
+                      </span>
+                      <span className="mt-3 block text-3xl font-normal leading-tight tracking-tight sm:mt-3.5 sm:text-4xl md:text-5xl lg:text-6xl">
+                        {staticLines.line2}
+                      </span>
+                    </h1>
+                    {showActions ? (
+                      <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:mt-9 sm:flex-row">
+                        {actions}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <>
+                    <h1 className="relative flex flex-col items-center gap-1 text-balance text-5xl font-semibold tracking-tight sm:gap-2 sm:text-7xl md:text-8xl">
+                      {words.map((w, i) => (
+                        <span
+                          key={`${i}-${w.text}`}
+                          className="inline-block will-change-transform"
+                          style={{
+                            transform: `translate3d(0, ${progress * w.drift}px, 0)`,
+                          }}
+                        >
+                          {w.text}
+                        </span>
+                      ))}
+                    </h1>
+
+                    {showSubtitle ? (
+                      <div
+                        className="relative mx-auto mt-8 max-w-2xl text-pretty text-center text-lg text-zinc-400 will-change-transform sm:mt-10"
                         style={{
-                          transform: `translate3d(0, ${progress * w.drift}px, 0)`,
+                          transform: `translate3d(0, ${progress * 18}px, 0)`,
+                          opacity: 1 - progress * 0.35,
                         }}
                       >
-                        {w.text}
-                      </span>
-                    ))}
-                  </h1>
+                        {subtitle}
+                      </div>
+                    ) : null}
 
-                  {showSubtitle ? (
-                    <div
-                      className="relative mx-auto mt-8 max-w-2xl text-pretty text-center text-lg text-zinc-400 will-change-transform sm:mt-10"
-                      style={{
-                        transform: `translate3d(0, ${progress * 18}px, 0)`,
-                        opacity: 1 - progress * 0.35,
-                      }}
-                    >
-                      {subtitle}
-                    </div>
-                  ) : null}
-
-                  {showActions ? (
-                    <div
-                      className="relative mt-10 flex flex-col items-center justify-center gap-3 will-change-transform sm:flex-row sm:mt-12"
-                      style={{
-                        transform: `translate3d(0, ${progress * 28}px, 0)`,
-                        opacity: 1 - progress * 0.45,
-                      }}
-                    >
-                      {actions}
-                    </div>
-                  ) : null}
-                </>
-              )}
+                    {showActions ? (
+                      <div
+                        className="relative mt-10 flex flex-col items-center justify-center gap-3 will-change-transform sm:flex-row sm:mt-12"
+                        style={{
+                          transform: `translate3d(0, ${progress * 28}px, 0)`,
+                          opacity: 1 - progress * 0.45,
+                        }}
+                      >
+                        {actions}
+                      </div>
+                    ) : null}
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+
+        {(carouselSlides?.length || brandImage?.src) ? (
+          <HeroScrollCarousel
+            slides={carouselSlides ?? []}
+            entrancePhase={carouselT}
+            brandImage={brandImage}
+            brandEntrancePhase={brandImage?.src ? brandT : 0}
+            brandLayerActive={
+              !brandImage?.src || progress >= brandStartResolved
+            }
+          />
+        ) : null}
       </div>
     </section>
   );
