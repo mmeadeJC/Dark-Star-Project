@@ -57,11 +57,17 @@ type HeroParallaxProps = {
    */
   heroForegroundFadeEndProgress?: number;
   /** Logo / wordmark above the carousel; scrolls up after hero copy fades. */
-  brandImage?: { src: string; alt: string } | null;
+  brandImage?: { src: string; alt: string; eyebrow?: string } | null;
   /** When set, begins `brandImage` entrance (0–1 scroll progress). */
   brandEnterStart?: number;
   /** When set, `brandImage` entrance completes. */
   brandEnterEnd?: number;
+  /**
+   * When there is no in-hero carousel, scroll progress (0–1) where the logo exit is done.
+   * If this is too close to `brandInEnd`, the exit is stretched to at least ~16% of hero
+   * progress so motion stays smooth.
+   */
+  brandPostEndProgress?: number;
 };
 
 function prefersReducedMotion(): boolean {
@@ -89,6 +95,7 @@ export function HeroParallax({
   brandImage,
   brandEnterStart,
   brandEnterEnd,
+  brandPostEndProgress,
 }: HeroParallaxProps) {
   const outerRef = useRef<HTMLElement>(null);
   const [progress, setProgress] = useState(0);
@@ -161,17 +168,21 @@ export function HeroParallax({
 
   const defaultBrandStart = Math.min(0.58, fgFadeEnd + 0.12);
   const defaultBrandEnd = Math.min(0.8, Math.max(defaultBrandStart + 0.14, fgFadeEnd + 0.36));
-  const brandStartResolved = brandEnterStart ?? defaultBrandStart;
-  const brandEndResolved = brandEnterEnd ?? defaultBrandEnd;
+  /** Never begin the Cold Cave slide-in until the headline has fully faded. */
+  const brandInStart = Math.max(fgFadeEnd + 0.02, brandEnterStart ?? defaultBrandStart);
+  /** Longer window = more scroll pixels per vh of motion (feels continuously tied to scroll). */
+  const brandInEnd = Math.max(
+    brandEnterEnd ?? defaultBrandEnd,
+    brandInStart + 0.26,
+  );
 
   const brandT =
-    brandImage?.src && brandEndResolved > brandStartResolved
+    brandImage?.src && brandInEnd > brandInStart
       ? Math.min(
           1,
           Math.max(
             0,
-            (progress - brandStartResolved) /
-              (brandEndResolved - brandStartResolved),
+            (progress - brandInStart) / (brandInEnd - brandInStart),
           ),
         )
       : 0;
@@ -179,7 +190,7 @@ export function HeroParallax({
   const resolvedCarouselEnterStart =
     carouselEnterStart ??
     (brandImage?.src
-      ? Math.min(0.9, brandEndResolved + 0.08)
+      ? Math.min(0.9, brandInEnd + 0.08)
       : Math.min(0.92, fgFadeEnd + 0.1));
   const resolvedCarouselEnterEnd = carouselEnterEnd ?? 0.98;
 
@@ -199,6 +210,54 @@ export function HeroParallax({
   const showEyebrow = eyebrow != null;
   const showSubtitle = subtitle != null;
   const showActions = actions != null;
+
+  let brandOffsetYvhOverride: number | undefined;
+  let brandOpacityOverride: number | undefined;
+
+  /** Below-frame offset (vh) while hidden / entering — single value for continuous motion. */
+  const BRAND_ENTER_Y_VH = 58;
+
+  if (brandImage?.src) {
+    if (progress < brandInStart) {
+      brandOffsetYvhOverride = BRAND_ENTER_Y_VH;
+      brandOpacityOverride = 0;
+    } else if (progress <= brandInEnd) {
+      brandOffsetYvhOverride = (1 - brandT) * BRAND_ENTER_Y_VH;
+      brandOpacityOverride = 1;
+    } else if (carouselSlides?.length) {
+      const c0 = resolvedCarouselEnterStart;
+      const c1 = resolvedCarouselEnterEnd;
+      if (progress < c0) {
+        const u =
+          (progress - brandInEnd) /
+          Math.max(1e-4, c0 - brandInEnd);
+        brandOffsetYvhOverride = -u * 52;
+        brandOpacityOverride = 1;
+      } else {
+        const v = (progress - c0) / Math.max(1e-4, c1 - c0);
+        brandOffsetYvhOverride = -52 - v * 40;
+        brandOpacityOverride = Math.max(0, 1 - v * 1.15);
+      }
+    } else {
+      /** Minimum scroll span so exit motion isn't compressed into a few % of progress (causes a jump). */
+      const MIN_EXIT_SPAN = 0.16;
+      const exitTarget = brandPostEndProgress ?? 1;
+      const exitEnd = Math.min(
+        1,
+        Math.max(brandInEnd + MIN_EXIT_SPAN, exitTarget),
+      );
+      const span = Math.max(MIN_EXIT_SPAN, exitEnd - brandInEnd);
+      const uRaw = Math.min(1, Math.max(0, (progress - brandInEnd) / span));
+      /** Ease-out: same position at u=0/1 as linear, gentler finish leaving the frame. */
+      const u = 1 - (1 - uRaw) ** 2.1;
+      const EXIT_PEAK_VH = 78;
+      brandOffsetYvhOverride = -u * EXIT_PEAK_VH;
+      brandOpacityOverride = Math.max(
+        0,
+        1 - Math.max(0, uRaw - 0.35) / 0.65,
+      );
+    }
+  }
 
   return (
     <section
@@ -336,9 +395,10 @@ export function HeroParallax({
             entrancePhase={carouselT}
             brandImage={brandImage}
             brandEntrancePhase={brandImage?.src ? brandT : 0}
-            brandLayerActive={
-              !brandImage?.src || progress >= brandStartResolved
-            }
+            brandLayerActive={Boolean(brandImage?.src)}
+            brandAccessible={!brandImage?.src || progress >= brandInStart}
+            brandOffsetYvhOverride={brandOffsetYvhOverride}
+            brandOpacityOverride={brandOpacityOverride}
           />
         ) : null}
       </div>

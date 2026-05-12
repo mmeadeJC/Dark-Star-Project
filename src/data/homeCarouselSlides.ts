@@ -1,10 +1,6 @@
 /** Carousel slides for the home hero (`HeroParallax` + `HeroScrollCarousel`). */
 export const homeCarouselSlides = [
   {
-    src: "/carousel/cold-cave-1.png",
-    alt: "Cold Cave — live performance with golden stage light",
-  },
-  {
     src: "/carousel/cold-cave-2.png",
     alt: "Cold Cave — duo with Korg synthesizer in red light",
   },
@@ -27,5 +23,9 @@ export const homeCarouselSlides = [
   {
     src: "/carousel/cold-cave-7.png",
     alt: "Cold Cave — green-lit performance against brick wall",
+  },
+  {
+    src: "/carousel/cold-cave-1.png",
+    alt: "Cold Cave — live performance with golden stage light",
   },
 ] as const;

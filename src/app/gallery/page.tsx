@@ -38,24 +38,14 @@ const galleryPieces = [
 
 export default function GalleryPage() {
   return (
-    <div className="relative flex min-h-[100svh] flex-col">
+    <div className="relative z-[2] flex min-h-full flex-1 flex-col overflow-x-hidden">
       <SiteHeader />
 
-      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: "url(/gallery/graveyard-bg.png)",
-          }}
-        />
-        <div className="absolute inset-0 bg-black/55" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
-      </div>
-
-      <main className="relative z-[1] mx-auto flex w-full max-w-7xl flex-1 flex-col px-6 pb-20 pt-[max(6.5rem,calc(env(safe-area-inset-top,0px)+5.25rem))]">
+      {/* ~18% wider than max-w-7xl (80rem) so each tile is ~18% larger at same column counts */}
+      <main className="relative z-[1] mx-auto flex w-full max-w-[min(100%,calc(80rem*1.18))] flex-1 flex-col rounded-2xl bg-zinc-950 px-6 pb-20 pt-[max(6.5rem,calc(env(safe-area-inset-top,0px)+5.25rem))] ring-1 ring-white/[0.06] sm:px-8">
         <header className="max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">
-            The Cold Cave
+            COLD CAVE STILLS
           </p>
           <h1 className="font-russo mt-2 text-4xl tracking-tight text-white sm:text-5xl md:text-6xl">
             Gallery
@@ -66,20 +56,22 @@ export default function GalleryPage() {
         </header>
 
         <section
-          className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          className="mt-14 grid auto-rows-fr gap-5 sm:grid-cols-2 lg:grid-cols-3"
           aria-label="Gallery artworks"
         >
-          {galleryPieces.map((piece) => (
+          {galleryPieces.map((piece, index) => (
             <figure
               key={piece.src}
-              className="group relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-zinc-950 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85)] ring-1 ring-white/10"
+              className="relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-zinc-950 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85)] ring-1 ring-white/10"
             >
               <Image
                 src={piece.src}
                 alt={piece.alt}
                 fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover transition duration-500 ease-out group-hover:scale-[1.03]"
+                sizes="(max-width: 640px) min(100vw,661px), (max-width: 1024px) 50vw, 425px"
+                priority={index === 0}
+                decoding="async"
+                className="object-cover"
               />
             </figure>
           ))}

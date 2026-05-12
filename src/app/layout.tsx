@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import { Geist, Geist_Mono, Russo_One } from "next/font/google";
 
 import Galaxy from "@/components/Galaxy";
 import { SiteFooter } from "@/components/SiteFooter";
 
 import "./globals.css";
+
+const neonderthaw = localFont({
+  src: "../fonts/Neonderthaw-Regular.ttf",
+  variable: "--font-neonderthaw",
+  display: "swap",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +43,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${russoOne.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${russoOne.variable} ${neonderthaw.variable} h-full antialiased`}
       style={{ colorScheme: "dark" }}
     >
       <body className="relative min-h-full flex flex-col text-zinc-100">
@@ -53,7 +60,7 @@ export default function RootLayout({
           glowIntensity={0.3}
           density={1.28}
           starSpeed={0.18}
-          twinkleIntensity={0.2}
+          twinkleIntensity={0}
           rotationSpeed={0.012}
           speed={0.38}
         />

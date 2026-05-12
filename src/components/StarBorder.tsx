@@ -41,6 +41,12 @@ export type StarBorderProps = Omit<
   edgeInsetPx?: number;
   /** Optional override when `edgeMask` can’t use `var(--background)` (e.g. custom stage). */
   edgeMaskBg?: string;
+  /**
+   * `soft` — lower opacity, no `mix-blend-mode: screen`, gentler motion (e.g. fixed nav over WebGL)
+   * to reduce full-viewport compositing flicker.
+   * `static` — no animated halo layers (nav / GPU stacks).
+   */
+  tone?: "default" | "soft" | "static";
   children?: ReactNode;
 };
 
@@ -77,6 +83,7 @@ export default function StarBorder({
   edgeMask,
   edgeInsetPx = 2,
   edgeMaskBg,
+  tone = "default",
   children,
   style,
   ...rest
@@ -113,11 +120,18 @@ export default function StarBorder({
 
   const topStagger = halfCycleDelay(speed);
 
+  const toneClass =
+    tone === "soft"
+      ? "sb-star-border-container--soft"
+      : tone === "static"
+        ? "sb-star-border-container--static"
+        : "";
+
   return createElement(
     Tag as ElementType,
     {
       ...rest,
-      className: `sb-star-border-container ${className}`.trim(),
+      className: `sb-star-border-container ${toneClass} ${className}`.trim(),
       style: mergedStyle,
     },
     <>

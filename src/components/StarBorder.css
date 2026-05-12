@@ -107,3 +107,48 @@
     opacity: 0;
   }
 }
+
+/* Calmer edge shimmer for fixed chrome over GPU / transparent stacks */
+.sb-star-border-container--soft .sb-border-gradient-bottom,
+.sb-star-border-container--soft .sb-border-gradient-top {
+  mix-blend-mode: normal;
+  filter: blur(6px);
+  will-change: transform;
+}
+
+.sb-star-border-container--soft .sb-border-gradient-bottom {
+  animation-name: sb-star-movement-bottom-soft;
+}
+
+.sb-star-border-container--soft .sb-border-gradient-top {
+  animation-name: sb-star-movement-top-soft;
+}
+
+@keyframes sb-star-movement-bottom-soft {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 0.48;
+  }
+  100% {
+    transform: translate(-100%, 0%);
+    opacity: 0.12;
+  }
+}
+
+@keyframes sb-star-movement-top-soft {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 0.48;
+  }
+  100% {
+    transform: translate(100%, 0%);
+    opacity: 0.12;
+  }
+}
+
+/* No animated layers — avoids compositor churn over WebGL / transparent pages */
+.sb-star-border-container--static .sb-border-gradient-bottom,
+.sb-star-border-container--static .sb-border-gradient-top,
+.sb-star-border-container--static .sb-star-edge-mask {
+  display: none !important;
+}
