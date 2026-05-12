@@ -13,7 +13,7 @@ function fitWordmarkFont(link: HTMLElement, maxWidthPx: number) {
 
   let lo = MIN_FONT_PX;
   let hi = MAX_FONT_PX;
-  for (let i = 0; i < 26; i++) {
+  for (let i = 0; i < 26; i += 1) {
     const mid = (lo + hi) / 2;
     link.style.fontSize = `${mid}px`;
     if (link.scrollWidth <= maxWidthPx) {

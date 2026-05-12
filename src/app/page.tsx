@@ -1,5 +1,6 @@
 import { HeroParallax } from "@/components/HeroParallax";
 import { HomeFeaturedCarousel } from "@/components/HomeFeaturedCarousel";
+import PixelTrail from "@/components/pixel-trail/PixelTrail";
 import { PillCircleHoverLink } from "@/components/PillCircleHoverLink";
 import StarBorder from "@/components/StarBorder";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -53,7 +54,19 @@ export default function Home() {
           alt: "COLD CAVE STILLS",
           eyebrow: "Listen to",
         }}
-      />
+      >
+        <div className="pointer-events-none absolute inset-0 h-full w-full">
+          <PixelTrail
+            gridSize={73}
+            trailSize={0.14}
+            maxAge={450}
+            interpolate={4.1}
+            color="#44ef7d"
+            gooeyFilter={{ id: "dark-star-hero-pixel-goo", strength: 2 }}
+            gooStrength={15}
+          />
+        </div>
+      </HeroParallax>
 
       <section
         aria-label="Cold Cave stills carousel"

@@ -62,7 +62,7 @@ export default function GalleryPage() {
           {galleryPieces.map((piece, index) => (
             <figure
               key={piece.src}
-              className="relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-zinc-950 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85)] ring-1 ring-white/10"
+              className="relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-zinc-950 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85)] ring-1 ring-white/10 transition-transform duration-300 ease-out will-change-transform hover:z-10 hover:scale-[1.04] motion-reduce:transition-none motion-reduce:hover:scale-100"
             >
               <Image
                 src={piece.src}

@@ -32,7 +32,7 @@ export function SiteFooter() {
     >
       <div className="mx-auto max-w-7xl px-6 pt-16 sm:pt-20">
         <div className="flex flex-col gap-12 lg:grid lg:grid-cols-[minmax(0,26rem)_1fr] lg:items-start lg:gap-x-12 xl:gap-x-20">
-          <div className="mx-auto flex w-[68%] max-w-[min(100%,326px)] shrink-0 flex-col gap-3 select-none lg:mx-0 lg:w-[68%] lg:max-w-none">
+          <div className="mx-auto flex w-[68%] max-w-[min(100%,326px)] shrink-0 flex-col gap-3 select-none lg:mx-0 lg:ml-[50px] lg:w-[68%] lg:max-w-none">
             <FooterAppStoreBadgeLink />
             <FooterGooglePlayBadgeLink />
           </div>
