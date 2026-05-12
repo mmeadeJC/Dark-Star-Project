@@ -170,21 +170,16 @@ export function HeroParallax({
   const defaultBrandEnd = Math.min(0.8, Math.max(defaultBrandStart + 0.14, fgFadeEnd + 0.36));
   /** Never begin the Cold Cave slide-in until the headline has fully faded. */
   const brandInStart = Math.max(fgFadeEnd + 0.02, brandEnterStart ?? defaultBrandStart);
-  /** Longer window = more scroll pixels per vh of motion (feels continuously tied to scroll). */
+  /** Minimum scroll progress span for brand slide-in (smaller = brand settles sooner on short heroes). */
+  const BRAND_IN_MIN_SPAN = 0.15;
   const brandInEnd = Math.max(
     brandEnterEnd ?? defaultBrandEnd,
-    brandInStart + 0.26,
+    brandInStart + BRAND_IN_MIN_SPAN,
   );
 
   const brandT =
-    brandImage?.src && brandInEnd > brandInStart
-      ? Math.min(
-          1,
-          Math.max(
-            0,
-            (progress - brandInStart) / (brandInEnd - brandInStart),
-          ),
-        )
+    brandImage?.src && brandInEnd > 1e-6
+      ? Math.min(1, Math.max(0, progress / brandInEnd))
       : 0;
 
   const resolvedCarouselEnterStart =
@@ -214,15 +209,20 @@ export function HeroParallax({
   let brandOffsetYvhOverride: number | undefined;
   let brandOpacityOverride: number | undefined;
 
-  /** Below-frame offset (vh) while hidden / entering — single value for continuous motion. */
-  const BRAND_ENTER_Y_VH = 58;
+  /**
+   * Brand vertical motion: one continuous ramp from first scroll — no idle band
+   * before `brandInStart` (avoids “nothing moves then it jumps”). `Y_MAX` starts well
+   * below frame; `Y_SETTLED` parks the block low, under the letterbox band.
+   */
+  const BRAND_Y_MAX_VH = 72;
+  const BRAND_Y_SETTLED_VH = 12;
+  /** 0–1: share of the fade segment spent at full opacity before opacity starts dropping. */
+  const BRAND_OPACITY_HOLD_RATIO = 0.34;
 
   if (brandImage?.src) {
-    if (progress < brandInStart) {
-      brandOffsetYvhOverride = BRAND_ENTER_Y_VH;
-      brandOpacityOverride = 0;
-    } else if (progress <= brandInEnd) {
-      brandOffsetYvhOverride = (1 - brandT) * BRAND_ENTER_Y_VH;
+    if (progress <= brandInEnd) {
+      brandOffsetYvhOverride =
+        BRAND_Y_MAX_VH * (1 - brandT) + BRAND_Y_SETTLED_VH * brandT;
       brandOpacityOverride = 1;
     } else if (carouselSlides?.length) {
       const c0 = resolvedCarouselEnterStart;
@@ -236,9 +236,16 @@ export function HeroParallax({
       } else {
         const v = (progress - c0) / Math.max(1e-4, c1 - c0);
         brandOffsetYvhOverride = -52 - v * 40;
-        brandOpacityOverride = Math.max(0, 1 - v * 1.15);
+        const vFade =
+          v <= BRAND_OPACITY_HOLD_RATIO
+            ? 0
+            : (v - BRAND_OPACITY_HOLD_RATIO) /
+              Math.max(1e-4, 1 - BRAND_OPACITY_HOLD_RATIO);
+        brandOpacityOverride = Math.max(0, 1 - vFade * 1.15);
       }
     } else {
+      /** Matches carousel path peak (`-52vh`) so exit motion stays one continuous line — no ease plateau. */
+      const EXIT_PEAK_VH = 52;
       /** Minimum scroll span so exit motion isn't compressed into a few % of progress (causes a jump). */
       const MIN_EXIT_SPAN = 0.16;
       const exitTarget = brandPostEndProgress ?? 1;
@@ -247,15 +254,15 @@ export function HeroParallax({
         Math.max(brandInEnd + MIN_EXIT_SPAN, exitTarget),
       );
       const span = Math.max(MIN_EXIT_SPAN, exitEnd - brandInEnd);
-      const uRaw = Math.min(1, Math.max(0, (progress - brandInEnd) / span));
-      /** Ease-out: same position at u=0/1 as linear, gentler finish leaving the frame. */
-      const u = 1 - (1 - uRaw) ** 2.1;
-      const EXIT_PEAK_VH = 78;
-      brandOffsetYvhOverride = -u * EXIT_PEAK_VH;
-      brandOpacityOverride = Math.max(
-        0,
-        1 - Math.max(0, uRaw - 0.35) / 0.65,
-      );
+      const uLin = Math.min(1, Math.max(0, (progress - brandInEnd) / span));
+      brandOffsetYvhOverride =
+        BRAND_Y_SETTLED_VH - uLin * (BRAND_Y_SETTLED_VH + EXIT_PEAK_VH);
+      const uOpacity =
+        uLin <= BRAND_OPACITY_HOLD_RATIO
+          ? 0
+          : (uLin - BRAND_OPACITY_HOLD_RATIO) /
+            Math.max(1e-4, 1 - BRAND_OPACITY_HOLD_RATIO);
+      brandOpacityOverride = Math.max(0, 1 - uOpacity);
     }
   }
 
@@ -396,7 +403,9 @@ export function HeroParallax({
             brandImage={brandImage}
             brandEntrancePhase={brandImage?.src ? brandT : 0}
             brandLayerActive={Boolean(brandImage?.src)}
-            brandAccessible={!brandImage?.src || progress >= brandInStart}
+            brandAccessible={
+              !brandImage?.src || (brandOpacityOverride ?? 1) > 0.05
+            }
             brandOffsetYvhOverride={brandOffsetYvhOverride}
             brandOpacityOverride={brandOpacityOverride}
           />

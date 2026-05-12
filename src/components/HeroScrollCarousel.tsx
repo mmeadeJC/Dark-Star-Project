@@ -1,12 +1,11 @@
 "use client";
 
-import Image from "next/image";
-import { useCallback, useState } from "react";
+import {
+  DragWheelEditorialCarousel,
+  type EditorialCarouselSlide,
+} from "@/components/DragWheelEditorialCarousel";
 
-export type HeroCarouselSlide = {
-  src: string;
-  alt: string;
-};
+export type HeroCarouselSlide = EditorialCarouselSlide;
 
 type HeroScrollCarouselProps = {
   slides: readonly HeroCarouselSlide[];
@@ -45,16 +44,6 @@ export function HeroScrollCarousel({
   brandOffsetYvhOverride,
   brandOpacityOverride,
 }: HeroScrollCarouselProps) {
-  const [index, setIndex] = useState(0);
-
-  const go = useCallback(
-    (dir: -1 | 1) => {
-      if (slides.length === 0) return;
-      setIndex((i) => (i + dir + slides.length) % slides.length);
-    },
-    [slides.length],
-  );
-
   const showBrand = Boolean(brandImage?.src);
 
   if (slides.length === 0 && !showBrand) return null;
@@ -66,7 +55,7 @@ export function HeroScrollCarousel({
   /** Linear scroll phase from parent (matches `HeroParallax` — no ease “plateau”). */
   const brandSlideLinear = Math.min(1, Math.max(0, brandEntrancePhase));
   /** Positive = further down; shrinks toward 0 as scroll progresses (slide up into place). */
-  const brandOffsetDefaultVh = (1 - brandSlideLinear) * 58;
+  const brandOffsetDefaultVh = (1 - brandSlideLinear) * 40;
   const brandOffsetYvh =
     brandOffsetYvhOverride !== undefined
       ? brandOffsetYvhOverride
@@ -84,7 +73,7 @@ export function HeroScrollCarousel({
       className={`pointer-events-none absolute inset-0 z-[8] flex flex-col items-center overflow-visible px-2 sm:px-4 ${
         showBrand
           ? slides.length === 0
-            ? "justify-center gap-4 pb-[min(30svh,14rem)] pt-[min(8vh,4rem)] sm:gap-5 sm:pb-[min(32svh,15rem)] sm:pt-[min(9vh,4.5rem)]"
+            ? "justify-end gap-2 pb-[min(14svh,6rem)] pt-[min(4vh,2rem)] sm:gap-2.5 sm:pb-[min(15svh,6.5rem)] sm:pt-[min(5vh,2.5rem)]"
             : "gap-8 justify-end pb-8 sm:gap-10 sm:pb-14"
           : "justify-center gap-8 sm:gap-10"
       }`}
@@ -92,11 +81,7 @@ export function HeroScrollCarousel({
     >
       {showBrand && brandImage ? (
         <div
-          className={`relative flex w-full shrink-0 flex-col items-center justify-center px-1 sm:px-2 ${
-            slides.length === 0
-              ? "mt-[min(16vh,8.5rem)] sm:mt-[min(18vh,9.5rem)] md:mt-[min(20vh,10.5rem)]"
-              : ""
-          }`}
+          className="relative flex w-full shrink-0 flex-col items-center justify-center px-1 sm:px-2"
           style={{
             opacity: brandOpacity,
             transform: `translate3d(0, ${brandOffsetYvh}vh, 0)`,
@@ -130,7 +115,7 @@ export function HeroScrollCarousel({
 
       {slides.length > 0 ? (
         <div
-          className={`pointer-events-auto w-full max-w-5xl ${entrancePhase > 0.12 ? "" : "pointer-events-none"}`}
+          className={`pointer-events-auto w-full max-w-[min(100%,72rem)] ${entrancePhase > 0.12 ? "" : "pointer-events-none"}`}
           style={{
             opacity: visible,
             transform: `translate3d(0, ${lift * 40}vh, 0)`,
@@ -139,94 +124,12 @@ export function HeroScrollCarousel({
           }}
           aria-hidden={entrancePhase < 0.08}
         >
-        <div
-          className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-zinc-950/90 shadow-[0_24px_80px_rgba(0,0,0,0.55)] ring-1 ring-white/[0.04]"
-          role="region"
-          aria-roledescription="carousel"
-          aria-label="COLD CAVE STILLS photo carousel"
-        >
-          <div
-            className="flex h-full w-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
-            style={{ transform: `translateX(-${index * 100}%)` }}
-          >
-            {slides.map((s) => (
-              <div
-                key={s.src}
-                className="relative h-full min-w-full shrink-0"
-              >
-                <Image
-                  src={s.src}
-                  alt={s.alt}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 896px"
-                  draggable={false}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-between gap-2 bg-gradient-to-t from-black/70 via-black/25 to-transparent px-3 pb-3 pt-16 sm:px-4 sm:pb-4">
-            <div className="pointer-events-auto flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => go(-1)}
-                className="grid size-10 place-items-center rounded-full border border-white/15 bg-zinc-950/80 text-zinc-100 shadow-sm transition hover:border-white/30 hover:bg-zinc-900"
-                aria-label="Previous slide"
-              >
-                <Chevron dir="left" />
-              </button>
-              <button
-                type="button"
-                onClick={() => go(1)}
-                className="grid size-10 place-items-center rounded-full border border-white/15 bg-zinc-950/80 text-zinc-100 shadow-sm transition hover:border-white/30 hover:bg-zinc-900"
-                aria-label="Next slide"
-              >
-                <Chevron dir="right" />
-              </button>
-            </div>
-            <div className="pointer-events-auto flex items-center gap-1.5">
-              {slides.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setIndex(i)}
-                  className={`h-2 rounded-full transition-[width,background] ${
-                    i === index
-                      ? "w-6 bg-white"
-                      : "w-2 bg-white/35 hover:bg-white/55"
-                  }`}
-                  aria-label={`Go to slide ${i + 1}`}
-                  aria-current={i === index ? "true" : undefined}
-                />
-              ))}
-            </div>
-          </div>
+          <DragWheelEditorialCarousel
+            slides={slides}
+            ariaLabel="COLD CAVE STILLS photo carousel"
+          />
         </div>
-      </div>
       ) : null}
     </div>
-  );
-}
-
-function Chevron({ dir }: { dir: "left" | "right" }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="20"
-      height="20"
-      aria-hidden
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.25"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {dir === "left" ? (
-        <path d="M15 6l-6 6 6 6" />
-      ) : (
-        <path d="M9 6l6 6-6 6" />
-      )}
-    </svg>
   );
 }

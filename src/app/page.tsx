@@ -1,4 +1,3 @@
-import { FeaturedCarouselScrollScale } from "@/components/FeaturedCarouselScrollScale";
 import { HeroParallax } from "@/components/HeroParallax";
 import { HomeFeaturedCarousel } from "@/components/HomeFeaturedCarousel";
 import { PillCircleHoverLink } from "@/components/PillCircleHoverLink";
@@ -42,10 +41,11 @@ export default function Home() {
             </PillCircleHoverLink>
           </>
         }
-        stickyScrollScreens={4}
+        stickyScrollScreens={2.48}
         heroForegroundFadeEndProgress={0.26}
-        brandEnterEnd={0.55}
-        brandPostEndProgress={0.82}
+        brandEnterStart={0.28}
+        brandEnterEnd={0.4}
+        brandPostEndProgress={0.62}
         backgroundDrift={64}
         backgroundScale={0.08}
         brandImage={{
@@ -56,20 +56,10 @@ export default function Home() {
       />
 
       <section
-        aria-labelledby="cold-cave-stills-heading"
-        className="relative -mt-[12.5rem] scroll-mt-2 bg-zinc-950/35 px-6 pb-16 pt-1 sm:-mt-[14.5rem] sm:scroll-mt-4 sm:pb-24 sm:pt-2 md:-mt-[16.5rem] lg:-mt-[18rem] mb-20 sm:mb-28"
+        aria-label="Cold Cave stills carousel"
+        className="relative -mt-[30rem] scroll-mt-2 w-full overflow-visible px-0 pb-2 pt-0 sm:-mt-[34rem] sm:scroll-mt-4 sm:pb-3 md:-mt-[36.5rem] lg:-mt-[41rem] mb-32 sm:mb-44"
       >
-        <div className="mx-auto max-w-5xl">
-          <p
-            id="cold-cave-stills-heading"
-            className="mb-3 text-center text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400 sm:mb-4"
-          >
-            COLD CAVE STILLS
-          </p>
-          <FeaturedCarouselScrollScale>
-            <HomeFeaturedCarousel slides={homeCarouselSlides} />
-          </FeaturedCarouselScrollScale>
-        </div>
+        <HomeFeaturedCarousel slides={homeCarouselSlides} />
       </section>
     </div>
   );

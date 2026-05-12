@@ -7,8 +7,8 @@ import {
   type ReactNode,
 } from "react";
 
-/** Starts noticeably larger; eases to `SCALE_MIN` over a long scroll band. */
-const SCALE_MAX = 1.22;
+/** Starts much larger than viewport; eases to `SCALE_MIN` over a wide scroll band. */
+const SCALE_MAX = 1.46;
 const SCALE_MIN = 1;
 
 function clamp(n: number, a: number, b: number) {
@@ -58,13 +58,13 @@ export function FeaturedCarouselScrollScale({
       /** Viewport Y where we consider the block “centered” (slightly above geometric center). */
       const targetY = vh * 0.48;
       /**
-       * Large band = more pixels of scroll before `t` reaches 1 (slower scale-down).
-       * Ease exponent keeps scale closer to max through the middle of the range.
+       * Wider band = more scroll distance before scale settles (longer, more readable “scale in”).
+       * Slightly lower ease power spreads change across the scroll range vs. bunching at the end.
        */
-      const halfBand = vh * 1.22;
+      const halfBand = vh * 1.58;
       const raw = 1 - Math.abs(blockCenter - targetY) / halfBand;
       const t = clamp(raw, 0, 1);
-      const eased = 1 - (1 - t) ** 2.45;
+      const eased = 1 - (1 - t) ** 2.05;
       setScale(SCALE_MAX - eased * (SCALE_MAX - SCALE_MIN));
     };
 
@@ -86,7 +86,7 @@ export function FeaturedCarouselScrollScale({
   return (
     <div
       ref={wrapRef}
-      className="origin-[50%_38%] overflow-visible pb-[min(10rem,22svh)] will-change-transform"
+      className="origin-[50%_38%] overflow-visible pb-[min(12rem,26svh)] will-change-transform"
       style={{ transform: `scale(${scale})` }}
     >
       {children}
